@@ -1,0 +1,7 @@
+#ignore these file types:
+*.log
+*.root
+*.png
+*.pdf
+*~
+#*

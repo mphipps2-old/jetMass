@@ -1,0 +1,9 @@
+dataset_number/I:crossSection/D:kFactor/D:genFiltEff/D
+364444  6.9474E+07  1.0  4.4009E-03  
+364445  3.9496E+05  1.0  7.1162E-03  
+364446  3.3985E+03  1.0  6.6463E-03  
+364447  1.9489E+01  1.0  4.9232E-03  
+364448  1.5465E-01  1.0  2.2793E-03  
+
+#lsetup  "asetup AthAnalysis,21.2.70" pyAMI
+#getMetadata.py --timestamp="2019-05-01 20:45:58" --physicsGroups="PMG,MCGN" --fields="dataset_number,crossSection,kFactor,genFiltEff" --inDS="mc16_5TeV.364444.Herwig7EvtGen_H7UE_NNPDF30nlo_jetjet_JZ1.recon.AOD.e7288_s3238_r11199,mc16_5TeV.364445.Herwig7EvtGen_H7UE_NNPDF30nlo_jetjet_JZ2.recon.AOD.e7288_s3238_r11199,mc16_5TeV.364446.Herwig7EvtGen_H7UE_NNPDF30nlo_jetjet_JZ3.recon.AOD.e7288_s3238_r11199,mc16_5TeV.364447.Herwig7EvtGen_H7UE_NNPDF30nlo_jetjet_JZ4.recon.AOD.e7288_s3238_r11199,mc16_5TeV.364448.Herwig7EvtGen_H7UE_NNPDF30nlo_jetjet_JZ5.recon.AOD.e7288_s3238_r11199"

@@ -1,0 +1,26 @@
+# on each login
+setupATLAS
+cd ../build
+asetup --restore
+source x86_64-*setup.sh
+
+# to compile
+cd build
+asetup 21.2.64,AnalysisBase # first time
+asetup --restore # all future times
+cmake ../athena/
+make
+source x86_64-*setup.sh
+
+# recompiling
+cd ../build
+make
+# or "cmake --build ../build/"
+source x86_64-*setup.sh
+
+# running
+cd run
+# local
+root -b -q '$ROOTCOREDIR/scripts/load_packages.C' '../athena/bTagger/share/Run_eljob.cxx ("results")'
+# grid 
+root -l -b -q '$ROOTCOREDIR/scripts/load_packages.C' '../athena/bTAgger/share/Submit_eljob.cxx ("results")'
