@@ -17,9 +17,6 @@ void jetMassLocal (const std::string& submitDir)
   double jet_pT_cut=40.;
   double jet_dR_truth_matching=0.2;
   double truth_jet_pT_cut=30.;
-  double truth_track_prob_cut=0.3;
-  double track_eta_cut = 2.5;
-  std::string track_pT_cut="HITight";
   int isMC=1;
   int isPP=1;  
 
@@ -61,9 +58,6 @@ void jetMassLocal (const std::string& submitDir)
   config.setProperty("JetPtCut",jet_pT_cut).ignore();
   config.setProperty("Jet_dr_truthMatching",jet_dR_truth_matching).ignore();
   config.setProperty("TruthJetPtCut",truth_jet_pT_cut).ignore();
-  config.setProperty("TruthTrackProbCut",truth_track_prob_cut).ignore();
-  config.setProperty("TrackEtaCut",track_eta_cut).ignore();
-  config.setProperty("TrackPtCut",track_pT_cut.c_str()).ignore();
   config.setProperty("MC_Flag",isMC).ignore();
   config.setProperty("pp_Flag",isPP).ignore();
 

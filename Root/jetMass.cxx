@@ -33,9 +33,6 @@ jetMass :: jetMass (const std::string& name,
   m_grl ("GoodRunsListSelectionTool/grl", this),
   m_trigDecisionTool ("Trig::TrigDecisionTool/TrigDecisionTool"),	
     m_trigConfigTool("TrigConf::xAODConfigTool/xAODConfigTool"),
-  m_muonSelection ("CP::MuonSelectionTool", this),
-  m_muonCalibrationAndSmearingTool ("CP::MuonCalibrationAndSmearingTool/MuonCorrectionTool",this),
-    m_trkSelection ("InDet::InDetTrackSelectionTool/MyTrackTool", this),
   m_tmt ("Trig::MatchingTool/MyMatchingTool", this)
 {
   m_grl.declarePropertyFor (this, "grlTool"); 
@@ -47,8 +44,6 @@ jetMass :: jetMass (const std::string& name,
   declareProperty("Jet_dr_truthMatching",m_jet_dR_truth_matching=0.2, "Truth Matching radius");
   declareProperty("TruthTrackProbCut",m_truth_track_prob_cut=0.3,"MC truth track probability cut");
   declareProperty("TruthJetPtCut",m_truth_jet_pT_cut=30.,"Min truth jet pt cut");
-  declareProperty("TrackEtaCut",m_track_eta_cut=2.5,"Max track eta cut");
-  declareProperty("TrackPtCut",m_track_pt_cut="HITight","Track selector track pt cut");
   declareProperty("MC_Flag",m_isMC=true,"MC flag");
   declareProperty("pp_Flag",m_isPP=true,"pp flag");
 
@@ -69,75 +64,33 @@ StatusCode jetMass :: initialize ()
 
   m_tree->Branch ("EventNumber", &m_EventNumber);
   m_tree->Branch ("RunNumber", &m_RunNumber);
-  //  m_tree->Branch ("LumiBlock", &m_LumiBlock);
-  //  m_tree->Branch ("Fcal", &m_FCal_Et);
-  //  m_tree->Branch ("FcalWeight", &m_FCalWeight);
+  m_tree->Branch ("LumiBlock", &m_LumiBlock);
+  m_tree->Branch ("Fcal", &m_FCal_Et);
+  m_tree->Branch ("FcalWeight", &m_FCalWeight);
   m_tree->Branch ("JzNorm", &m_jzNorm);
   m_tree->Branch ("PrimaryVertexZ", &m_primaryVertexZ);
 
   // Antikt4HI jets
   m_tree->Branch ("Jet_pt", &m_Jet_pt);
-  //  m_tree->Branch ("Jet_e",  &m_Jet_e);
-  //  m_tree->Branch ("Jet_eta", &m_Jet_eta);
+  m_tree->Branch ("Jet_pt2", &m_Jet_pt2);
+  m_tree->Branch ("Jet_e",  &m_Jet_e);
+  m_tree->Branch ("Jet_eta", &m_Jet_eta);
   m_tree->Branch ("Jet_y", &m_Jet_y);
   m_tree->Branch ("Jet_phi", &m_Jet_phi);
+  m_tree->Branch ("Jet_mass2", &m_Jet_mass2);
+  m_tree->Branch ("Jet_mass2OverPt2", &m_Jet_mass2OverPt2);
 
   // Antikt4HI truth jets
   m_tree->Branch ("TruthJet_pid", &m_TruthJet_pid);
   m_tree->Branch ("TruthJet_pt", &m_TruthJet_pt);
-  //  m_tree->Branch ("TruthJet_e",  &m_TruthJet_e);
-  //  m_tree->Branch ("TruthJet_eta", &m_TruthJet_eta);
-  //  m_tree->Branch ("TruthJet_y", &m_TruthJet_y);
-  //  m_tree->Branch ("TruthJet_phi", &m_TruthJet_phi);
-
-  // Secondary vertex associated with jet
-  m_tree->Branch ("JetSV1_pu", &m_Jet_sv1_pu);
-  m_tree->Branch ("JetSV1_pb", &m_Jet_sv1_pb);
-  m_tree->Branch ("JetSV1_pc", &m_Jet_sv1_pc);
-  m_tree->Branch ("JetSV1_efrc", &m_Jet_sv1_efrc);
-  m_tree->Branch ("JetSV1_mass", &m_Jet_sv1_mass);
-  m_tree->Branch ("JetSV1_n2t", &m_Jet_sv1_n2t);
-  m_tree->Branch ("JetSV1_ntrkv", &m_Jet_sv1_ntrkv);
-  m_tree->Branch ("JetSV1_Lxy", &m_Jet_sv1_LXY);
-  m_tree->Branch ("JetSV1_L3d", &m_Jet_sv1_L3d);
-  m_tree->Branch ("JetSV1_sig3d", &m_Jet_sv1_sig3d);
-  m_tree->Branch ("JetSV1_distmatlay", &m_Jet_sv1_distmatlay);
-  m_tree->Branch ("JetSV1_dR", &m_Jet_sv1_dR);
-
-  // Inner Detector Tracks associated with jet
-  m_tree->Branch ("JetTrack_d0", &m_JetTrack_d0);
-  m_tree->Branch ("JetTrack_d0_cut", &m_JetTrack_d0_cut);
-  m_tree->Branch ("JetTrack_dR", &m_JetTrack_dR);
-  m_tree->Branch ("JetTrack_charge", &m_JetTrack_charge);
-  m_tree->Branch ("JetTrack_pt", &m_JetTrack_pt);
-  m_tree->Branch ("JetTrack_pz", &m_JetTrack_pz);
-  m_tree->Branch ("JetTrack_e", &m_JetTrack_e); 
-  m_tree->Branch ("JetTrack_eta", &m_JetTrack_eta);
-  m_tree->Branch ("JetTrack_phi", &m_JetTrack_phi);
-  m_tree->Branch ("JetTrack_pid", &m_JetTrack_pid);
-  m_tree->Branch ("JetTrack_truth_dR", &m_JetTrack_truth_dR);
-  m_tree->Branch ("JetTrack_truthMatched", &m_JetTrack_truthMatched);
-
-  /*
-  m_tree->Branch ("JetTrack_status", &m_JetTrack_status);
-  m_tree->Branch ("JetTrack_type", &m_JetTrack_type);
-  m_tree->Branch ("JetTrackTruth_charge", &m_JetTrackTruth_charge);
-  m_tree->Branch ("JetTrackTruth_pt", &m_JetTrackTruth_pt);
-  m_tree->Branch ("JetTrackTruth_pz", &m_JetTrackTruth_pz);
-  m_tree->Branch ("JetTrackTruth_e", &m_JetTrackTruth_e); 
-  m_tree->Branch ("JetTrackTruth_eta", &m_JetTrackTruth_eta);
-  m_tree->Branch ("JetTrackTruth_phi", &m_JetTrackTruth_phi);
-  */
-
-  // MUON
-  m_tree->Branch ("Muon_pt",     &m_Muon_pt);
-  m_tree->Branch ("Muon_eta",    &m_Muon_eta);
-  m_tree->Branch ("Muon_phi",    &m_Muon_phi);
-  m_tree->Branch ("Muon_charge", &m_Muon_charge);
-  m_tree->Branch ("Muon_parent",  &m_Muon_parent);
-  m_tree->Branch ("Muon_e",      &m_Muon_e);
-  m_tree->Branch ("Muon_quality",&m_Muon_quality);
- 
+  m_tree->Branch ("TruthJet_pt2", &m_TruthJet_pt2);
+  m_tree->Branch ("TruthJet_e",  &m_TruthJet_e);
+  m_tree->Branch ("TruthJet_eta", &m_TruthJet_eta);
+  m_tree->Branch ("TruthJet_y", &m_TruthJet_y);
+  m_tree->Branch ("TruthJet_phi", &m_TruthJet_phi);
+  m_tree->Branch ("TruthJet_mass2", &m_TruthJet_mass2);
+  m_tree->Branch ("TruthJet_mass2OverPt2", &m_TruthJet_mass2OverPt2);
+  
   // setting GRL 
   std::string GRLFilePath = PathResolverFindCalibFile(m_grl_fileName.c_str());
   std::vector<std::string> vecStringGRL;
@@ -156,22 +109,6 @@ StatusCode jetMass :: initialize ()
     ANA_CHECK (m_tmt.setProperty("TrigDecisionTool",m_trigDecisionTool.getHandle()));
     ANA_CHECK (m_tmt.initialize());
   }
-  // muon selector tool
-  ANA_CHECK (m_muonSelection.setProperty("TrtCutOff",true));
-  ANA_CHECK (m_muonSelection.setProperty("MaxEta", m_track_eta_cut)); 
-  ANA_CHECK (m_muonSelection.setProperty("MuQuality", 1));
-  ANA_CHECK (m_muonSelection.initialize());
-  // muon calibration and smearing
-  ANA_CHECK (m_muonCalibrationAndSmearingTool.initialize());
-  // tracking selection tool
-  ANA_CHECK (m_trkSelection.setProperty("CutLevel",m_track_pt_cut.c_str()));
-  // ANA_CHECK (m_trkSelection.setProperty("maxZ0SinTheta",1.0));
-  //  ANA_CHECK (m_trkSelection.setProperty("minPt",m_reco_track_pT_cut));
-  // ANA_CHECK (m_trkSelection.setProperty("maxNSiSharedModules",100));
-  ANA_CHECK (m_trkSelection.initialize());
-
-  m_d0_cut = new TF1("f1", "[0]*exp([1]*x)+[2]*exp([3]*x)", 0.4, 500);
-  m_d0_cut->SetParameters(0.472367, -0.149934, 0.193095, 0.000337765);
 
   return StatusCode::SUCCESS;
 }
@@ -313,51 +250,7 @@ StatusCode jetMass :: execute ()
       }
     } 
   
-
-    if( !(dum_HLT_mu8 || dum_HLT_mu10 || dum_HLT_mu14)  ) return StatusCode::SUCCESS;
   }
-  //  ANA_MSG_INFO ("Muon container");
-  const xAOD::MuonContainer* muons = 0;
-  ANA_CHECK(evtStore()->retrieve( muons, "Muons" ));
- 
-  auto muons_shallowCopy = xAOD::shallowCopyContainer( *muons );
-  std::unique_ptr<xAOD::MuonContainer> muonsSC (muons_shallowCopy.first);
-  std::unique_ptr<xAOD::ShallowAuxContainer> muonsAuxSC (muons_shallowCopy.second);
-
-  for (unsigned int i = 0; i < muonsSC->size(); i++) {
-    xAOD::Muon* muonSC0 = (xAOD::Muon*) muonsSC->at(i);
-    if(m_muonCalibrationAndSmearingTool->applyCorrection(*muonSC0)!= CP::CorrectionCode::Ok){
-      ANA_MSG_INFO ("execute(): Problem with Muon Calibration And Smearing Tool (Error or OutOfValidityRange) ");
-    }
-    if ( !m_muonSelection->accept(*muonSC0) ) continue;
-
-    // start probe loop
-    for (unsigned int j = i + 1; j < muonsSC->size(); j++) {
-      xAOD::Muon* muonSC1 = (xAOD::Muon*) muonsSC->at(j);
-      if(m_muonCalibrationAndSmearingTool->applyCorrection(*muonSC1)!= CP::CorrectionCode::Ok){
-	ANA_MSG_INFO ("execute(): Problem with Muon Calibration And Smearing Tool (Error or OutOfValidityRange) ");
-      }	
-      if ( !m_muonSelection->accept(*muonSC1) ) continue;
-      if (muonSC1->charge() == muonSC0->charge()) continue;
-
-      TLorentzVector daughter0;
-      TLorentzVector daughter1;
-      TLorentzVector mom;
-      daughter0.SetPtEtaPhiM(muonSC0->pt()/1.e3, muonSC0->eta(), muonSC0->phi(), 0.106);
-      daughter1.SetPtEtaPhiM(muonSC1->pt()/1.e3, muonSC1->eta(), muonSC1->phi(), 0.106);
-      mom = daughter0 + daughter1;
-      if (mom.M() < 2.7 or mom.M() > 3.5) continue;
-      //Probe info
-      m_Muon_pt       .push_back( muonSC1->pt()*1e-3);
-      m_Muon_eta      .push_back( muonSC1->eta() );
-      m_Muon_phi      .push_back( muonSC1->phi() );
-      m_Muon_charge   .push_back( muonSC1->charge() );
-      m_Muon_e        .push_back( muonSC1->e()*1e-3 );
-      m_Muon_quality  .push_back( m_muonSelection->getQuality(*muonSC1) );
-    } // end loop probe muon
-	
-  } // end loop Tag
-
 
   //  ANA_MSG_INFO ("jet container ");
   const xAOD::JetContainer* jets = 0;
@@ -373,59 +266,32 @@ StatusCode jetMass :: execute ()
   std::unique_ptr<xAOD::JetContainer> truthJetsSC (truthJets_shallowCopy.first);
   std::unique_ptr<xAOD::ShallowAuxContainer> truthJetsAuxSC (truthJets_shallowCopy.second);
 
-  bool isCJet = 0;
-  bool isBJet = 0; 
-  //  ANA_MSG_INFO ("loop through jets: " << jetsSC->size());
-  //  for (xAOD::Jet *jet : *jets) {
   for (unsigned int i = 0; i < jetsSC->size(); i++) {
     xAOD::Jet* jet = (xAOD::Jet*) jetsSC->at(i);
-    //    ANA_MSG_INFO ("new jet ");
     //    if (m_isPP && !m_jetCleaning->keep( *jet )) continue;
 
     xAOD::JetFourMom_t jet_4mom = jet->jetP4(); 
     fastjet::PseudoJet MomFourVec = fastjet::PseudoJet ( jet_4mom.px(), jet_4mom.py(), jet_4mom.pz(), jet_4mom.energy() );
     double jetPt = jet_4mom.pt()*1e-3;
+    double jetPt2 = jetPt*jetPt;
     double jetEta = jet->eta();
     double jetPhi = jet->phi();
     double jetE = jet->e()*1e-3;
     double jetRap = MomFourVec.rapidity(); 
+    double jetMass2 = MomFourVec.m2()*0.001*0.001;
     int truthJetIndex = -1;
     double truthJetPt = -1;
     int truthJet_pid = -1;
+    double truthJetPt = -1.;
+    double truthJetPt2 = -1.;
+    double truthJetEta = -1.;
+    double truthJetPhi = -1.;
+    double truthJetE = -1.;
+    double truthJetRap = -1.; 
+    double truthJetMass2 = -1.;
+
     if ( fabs(jetEta) > m_jet_eta_cut ) 
-      continue;
-
-    
-    float sv1_Lxy = -99.; float sv1_L3d = -99.; float sv1_mass = -99.; float sv1_efrc = -99.; 
-    int sv1_n2t = -99; int sv1_ntrkv = -99; 
-    float sv1_sig3d = -99.; float sv1_distmatlay = -99.; float sv1_dR = -99.;
-    double sv1_pu = -99.; double sv1_pb = -99.; double sv1_pc = -99.; 
-
-    const xAOD::BTagging *bjet(nullptr);
-    bjet = jet->btagging();
-    bool sv1_ok(false);
-    std::vector< ElementLink< xAOD::VertexContainer > > myVertices_SV1;
-    bjet->variable<std::vector<ElementLink<xAOD::VertexContainer> > >("SV1", "vertices", myVertices_SV1);
-    if ( myVertices_SV1.size() > 0 && myVertices_SV1[0].isValid() ) {
-      // if we found a vertex, then sv1 is okay to use
-      sv1_ok = true;
-    }
-    if (sv1_ok) {
-      bjet->variable<double>("SV1", "pu", sv1_pu);
-      bjet->variable<double>("SV1", "pb", sv1_pb);
-      bjet->variable<double>("SV1", "pc", sv1_pc);
-            
-      bjet->variable<float>("SV1", "masssvx",  sv1_mass);
-      bjet->variable<float>("SV1", "efracsvx", sv1_efrc);
-          bjet->variable<int>("SV1",   "N2Tpair",  sv1_n2t);
-           bjet->variable<int>("SV1",   "NGTinSvx", sv1_ntrkv);
-      bjet->variable<float>("SV1", "normdist", sv1_sig3d);
-        
-      bjet->variable<float>("SV1", "dstToMatLay" , sv1_distmatlay);
-      bjet->variable<float>("SV1", "deltaR", sv1_dR);
-      bjet->variable<float>("SV1", "Lxy",    sv1_Lxy);
-      bjet->variable<float>("SV1", "L3d",    sv1_L3d);
-    }
+      continue;    
     
     //if MC, match to truth
     if (m_isMC) {
@@ -435,233 +301,64 @@ StatusCode jetMass :: execute ()
       xAOD::Jet* truthJet = (xAOD::Jet*) truthJetsSC->at(truthJetIndex);
       xAOD::JetFourMom_t truthJet_4mom = truthJet->jetP4(); 
       truthJetPt = truthJet_4mom.pt()*1e-3;
-      truthJet_pid = truthJet->getAttribute<int>("PartonTruthLabelID");
+      truthJetPt2 = truthJetPt*truthJetPt;
+      truthJetEta = truthJet->eta();
+      truthJetPhi = truthJet->phi();
+      truthJetE = truthJet->e()*1e-3;
+      truthJetRap = truthJet_4mom.rapidity(); 
+      truthJetMass2 = truthJet_4mom.m2()*0.001*0.001;
       // LQ: 1-3; gluon: 9 or 21; c: 4; b: 5
-      if (truthJet_pid == 1 || truthJet_pid == 2 || truthJet_pid == 3 || truthJet_pid == 9 || truthJet_pid == 21) {
-	// keep 5% of total inclusive events
-      }
-      else if (truthJet_pid == 4) {
-	// keep 50% of c jets (10% of total spectrum)
-	isCJet = 1;
-      }
-      else if (truthJet_pid == 5) {
-	// keep all b jets (around 5% of total spectrum)
-	isBJet = 1; 
-      }
-
+      truthJet_pid = truthJet->getAttribute<int>("PartonTruthLabelID");
       if (truthJetPt < m_truth_jet_pT_cut) continue; // cut events with truth below cut
 
       //    if (!jetcorr->MCJetJERClean(truth_jet_pt_vector.at(truthindex),jet_pt,truth_jet_eta_vector.at(truthindex),cent_bin_fine) ) continue; //cut on JER balance -- cuts events reconstructed 5sigma (ie 5*JER) from truth
     }
-    //    ANA_MSG_INFO ("truth matched jet"); 
   
-    ////////////////////// ASSOCIATED TRACKS PER JET //////////////////////
-    const xAOD::TrackParticleContainer* recoTracks = 0;
-    std::vector<double> jetTrack_dR;
-    std::vector<double> jetTrack_d0;
-    std::vector<double> jetTrack_d0_cut;
-    std::vector<double> jetTrack_pt;
-    std::vector<double> jetTrack_pz;
-    std::vector<double> jetTrack_e;
-    std::vector<double> jetTrack_eta;
-    std::vector<double> jetTrack_phi;
-    std::vector<int>    jetTrack_charge;
-    std::vector<double> jetTrack_truth_dR;
-    std::vector<bool>   jetTrack_truthMatched;
-    std::vector<int> jetTrack_pid;
-    ANA_CHECK(evtStore()->retrieve( recoTracks, "InDetTrackParticles" ));
-    //  ANA_MSG_INFO ("looping through tracks "); 
-    for (const auto& trk : *recoTracks) {
-      //get the tracks....
-      double pt = trk->pt()/1000.;
-      double pz = trk->p4().Pz()/1000.;
-      double eta = trk->eta();
-      double e = trk->e();
-      double phi = trk->phi();       
-      int charge = trk->charge();
-      if ( fabs(eta) > m_track_eta_cut ) continue;
-      //      ANA_MSG_INFO ("survived track eta cut");
-      double dR_track = dR(eta,phi,jetEta,jetPhi);
-      double d0 = trk->d0();
-      double d0_cut = m_d0_cut->Eval(pt);
-      //       if(fabs(d0) > d0_cut) continue; //pT dependant d0 cut
-      if(!m_trkSelection->accept(*trk)) continue; //track selector tool
-
-      //Additional track selection: this would happen if the a track is misreconstructed high or a jet misreconstructed low -- note this cut would only cut a single track which would be wrong for my recNN case -- better solution would be to cut the entire event -- removing this for now but study this effect later offline!
-      //       if (!trkcorr->PassTracktoJetBalance(pt, jet_pt, eta, jet_eta,cent_bin)) continue;
-
-       // truth particle matching 
-       bool isTruthMatched=false;
-       fastjet::PseudoJet matchPar = fastjet::PseudoJet (0,0,0,0);
-       int pid = 0.;
-       //       int status = 0.; 
-       //       int trktype = -1;
-       //       int charge_truth = 0 ;
-       //       double pt_truth = 0.;
-       //       double pz_truth = 0.;
-       //       double m_truth = 139.570; // pion mass in MeV
-       //       double e_truth = 0.;
-       double eta_truth = 0.;
-       double phi_truth = 0.;
-       double dR_truth = 0.;
-       if ( m_isMC) { 
-	 //Truth matching
-	 ElementLink< xAOD::TruthParticleContainer > truthLink = trk->auxdata<ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
-	 float mcprob;
-	 if(truthLink.isValid()) {
-	   /*
-	     trktype = getTypeReco((*truthLink)->barcode(),(*truthLink)->pdgId(),(*truthLink)->status(),(*truthLink)->charge(),mcprob,_mcProbCut);
-	     // 0 - fake, 1 - primary, 2 - secondary, 3 - primary out-of-phase-space, 4 - secondary neutral, 5 - truth primary strange baryons
-
-	     // status 1 is stable particle -- only save status 1
-	     status = (*truthLink)->status();
-	     pt_truth = (*truthLink)->pt()/1000.;
-	     pz_truth = (*truthLink)->p4().Pz()/1000.;
-	     e_truth = (*truthLink)->e();
-	     charge_truth = (*truthLink)->charge();
-	   */
-	     pid = (*truthLink)->pdgId();
-	     eta_truth = (*truthLink)->eta();
-	     phi_truth = (*truthLink)->phi();
-	     dR_truth = dR(eta,phi,eta_truth,phi_truth);
-	     mcprob = trk->auxdata<float>("truthMatchProbability");
-	     // pythia has barcode 0-10k, hijing 10k-200k, secondaries 200k+ 
-	     if ( ( mcprob > m_truth_track_prob_cut ) && ( (*truthLink)->barcode() > 0 ) &&  ( (*truthLink)->barcode() < 200000 ) ) {  
-	       isTruthMatched = true;
-	       matchPar = fastjet::PseudoJet( (*truthLink)->p4() );
-	     }
-	 }
-       }
-       jetTrack_dR.push_back(dR_track);
-       jetTrack_d0.push_back(d0);
-       jetTrack_d0_cut.push_back(d0_cut);
-       jetTrack_pt.push_back(pt);
-       jetTrack_pz.push_back(pz);
-       jetTrack_e.push_back(e) ;
-       jetTrack_eta.push_back(eta);
-       jetTrack_phi.push_back(phi);       
-       jetTrack_charge.push_back(charge);
-       jetTrack_truth_dR.push_back(dR_truth);
-       jetTrack_truthMatched.push_back(isTruthMatched);
-       jetTrack_pid.push_back(pid);
-       /*
-       jetTrackTruth_pt.push_back(pt_truth);
-       jetTrackTruth_pt.push_back(pz_truth);		 
-       jetTrackTruth_e.push_back(e_truth) ;
-       jetTrackTruth_eta.push_back(eta_truth);
-       jetTrackTruth_phi.push_back(phi_truth);
-       jetTrack_type.push_back(trktype);
-       jetTrack_status.push_back(status);
-       */
-    } // end reco track loop
-    m_JetTrack_dR.push_back(jetTrack_dR);
-    m_JetTrack_d0.push_back(jetTrack_d0);
-    m_JetTrack_d0_cut.push_back(jetTrack_d0_cut);
-    m_JetTrack_charge.push_back(jetTrack_charge);
-    m_JetTrack_pt.push_back(jetTrack_pt);    
-    m_JetTrack_pz.push_back(jetTrack_pz);
-    m_JetTrack_e.push_back(jetTrack_e);
-    m_JetTrack_eta.push_back(jetTrack_eta);
-    m_JetTrack_phi.push_back(jetTrack_phi);
-    m_JetTrack_pid.push_back(jetTrack_pid);
-    m_JetTrack_truth_dR.push_back(jetTrack_truth_dR);
-    m_JetTrack_truthMatched.push_back(jetTrack_truthMatched);
-    /*
-    m_JetTrack_status.push_back(jetTrack_status);
-    m_JetTrack_type.push_back(jetTrack_type);    
-    m_JetTrackTruth_charge.push_back(jetTrackTruth_charge);
-    m_JetTrackTruth_pt.push_back(jetTrackTruth_pt);
-    m_JetTrackTruth_e.push_back(jetTrackTruth_e);
-    m_JetTrackTruth_eta.push_back(jetTrackTruth_eta);
-    m_JetTrackTruth_phi.push_back(jetTrackTruth_phi);
-    */
     m_Jet_pt.push_back(jetPt);    
+    m_Jet_pt2.push_back(jetPt2);    
     m_Jet_eta.push_back(jetEta);
     m_Jet_phi.push_back(jetPhi);
     m_Jet_e.push_back(jetE);
     m_Jet_y.push_back(jetRap);
+    m_Jet_mass2.push_back(jetMass2);
+    m_Jet_mass2OverPt2.push_back(jetMass2/jetPt2);
     m_TruthJet_pid.push_back(truthJet_pid);
     m_TruthJet_pt.push_back(truthJetPt);
+    m_TruthJet_pt2.push_back(truthJetPt2);    
+    m_TruthJet_eta.push_back(truthJetEta);
+    m_TruthJet_phi.push_back(truthJetPhi);
+    m_TruthJet_e.push_back(truthJetE);
+    m_TruthJet_y.push_back(truthJetRap);
+    m_TruthJet_mass2.push_back(truthJetMass2);
+    m_TruthJet_mass2OverPt2.push_back(truthJetMass2/truthJetPt2);
 
-    m_Jet_sv1_pu.push_back(sv1_pu);
-    m_Jet_sv1_pb.push_back(sv1_pb);
-    m_Jet_sv1_pc.push_back(sv1_pc);
-    m_Jet_sv1_mass.push_back(sv1_mass);
-    m_Jet_sv1_efrc.push_back(sv1_efrc);
-    m_Jet_sv1_n2t.push_back(sv1_n2t);
-    m_Jet_sv1_ntrkv.push_back(sv1_ntrkv);
-    m_Jet_sv1_sig3d.push_back(sv1_sig3d);
-    m_Jet_sv1_distmatlay.push_back(sv1_distmatlay);
-    m_Jet_sv1_dR.push_back(sv1_dR);
-    m_Jet_sv1_LXY.push_back(sv1_Lxy);
-    m_Jet_sv1_L3d.push_back(sv1_L3d);
     // add prescales if we're using lower trigger HI jets
   }
-  //  srand(time(NULL));
-  //  TRandom3 *rand = new TRandom3(rand());
-  TRandom3 *rand = new TRandom3(0);
-  double randRatio;
-  bool keepInclusiveEvent = 0;
-  bool keepCEvent = 0;
-  // keep 5% of inclusive events
-  if (!isBJet && !isCJet) {
-    randRatio = rand->Uniform(0,1);  // returns uniform random # between [0,1]
-    if (randRatio > 0.4 && randRatio < 0.45) {
-      keepInclusiveEvent = 1;
-    }
-  }
-  // keep 50% of c jet events
-  if (isCJet) {
-    randRatio = rand->Uniform(0,1);
-    if (randRatio < 0.5) {
-      keepCEvent = 1;
-    }
-  }
-  if (isBJet || keepCEvent || keepInclusiveEvent) {
-    m_tree->Fill();
-  }
+  
+  m_tree->Fill();
   clearVector(); 
 
   return StatusCode::SUCCESS;
 }
 
 void jetMass :: clearVector () {
-  m_JetTrack_dR.clear();
-  m_JetTrack_d0.clear();
-  m_JetTrack_d0_cut.clear();
-  m_JetTrack_charge.clear();
-  m_JetTrack_pt.clear();
-  m_JetTrack_e.clear();
-  m_JetTrack_eta.clear();
-  m_JetTrack_phi.clear();
-  m_JetTrack_pid.clear();
-  m_JetTrack_truth_dR.clear();
-  m_JetTrack_truthMatched.clear();
+
   m_Jet_pt.clear();
+  m_Jet_pt2.clear();
   m_Jet_e.clear();
   m_Jet_eta.clear();
   m_Jet_y.clear();
   m_Jet_phi.clear();
-  m_Muon_pt.clear();
-  m_Muon_eta.clear();
-  m_Muon_phi.clear();
-  m_Muon_charge.clear();
-  m_Muon_parent.clear();
-  m_Muon_quality.clear();
-  m_Muon_e.clear();
-
-  m_Jet_sv1_pu.clear();
-  m_Jet_sv1_pb.clear();
-  m_Jet_sv1_pc.clear();
-  m_Jet_sv1_mass.clear();
-  m_Jet_sv1_efrc.clear();
-  m_Jet_sv1_n2t.clear();
-  m_Jet_sv1_ntrkv.clear();
-  m_Jet_sv1_sig3d.clear();
-  m_Jet_sv1_distmatlay.clear();
-  m_Jet_sv1_dR.clear();
-  m_Jet_sv1_LXY.clear();
-  m_Jet_sv1_L3d.clear();
+  m_Jet_mass2.clear();
+  m_Jet_mass2OverPt2.clear();
+  m_TruthJet_pt.clear();
+  m_TruthJet_pt2.clear();
+  m_TruthJet_e.clear();
+  m_TruthJet_eta.clear();
+  m_TruthJet_y.clear();
+  m_TruthJet_phi.clear();
+  m_TruthJet_mass2.clear();
+  m_TruthJet_mass2OverPt2.clear();
   
   if (!m_isMC) {
     m_TriggerObject_Chain.clear();
@@ -670,54 +367,6 @@ void jetMass :: clearVector () {
 
 }
 
-
-double jetMass :: mindRmuon(const xAOD::TrackParticle* trk)
-{
-  double dr_min = 999;
-  const xAOD::MuonContainer* muons2 = 0;
-  if(evtStore()->retrieve( muons2, "Muons" ).isFailure()){
-    std::cout << "Could not retrieve MuonContainer with key " << "Muons" << std::endl;
-  }
-
-  auto muons_shallowCopy2 = xAOD::shallowCopyContainer( *muons2 );
-  std::unique_ptr<xAOD::MuonContainer> muonsSC2 (muons_shallowCopy2.first);
-  std::unique_ptr<xAOD::ShallowAuxContainer> muonsAuxSC2 (muons_shallowCopy2.second);
-
-  for (unsigned int i = 0; i < muonsSC2->size(); i++) {
-
-    xAOD::Muon* muon2 = (xAOD::Muon*) muonsSC2->at(i);
-    if(m_muonCalibrationAndSmearingTool->applyCorrection(*muon2)!= CP::CorrectionCode::Ok){
-      ANA_MSG_INFO ("execute(): Problem with Muon Calibration And Smearing Tool (Error or OutOfValidityRange) ");
-    }
-    if ( !m_muonSelection->accept(*muon2) ) continue;
-    if( muon2->charge() != trk->charge()) continue;
-
-    double dr = dR(trk->eta(), trk->phi(), muon2->eta(), muon2->phi());
-
-    if(dr<dr_min) dr_min = dr;
-  }
-
-  return dr_min;
-}
-
-double jetMass :: mindRTrk(const xAOD::TrackParticle* metrk)
-{  
-  double dr_min = 999;
-  const xAOD::TrackParticleContainer* tracks = 0;
-  if(evtStore()->retrieve( tracks, "InDetTrackParticles" ).isFailure()){
-    std::cout << "Could not retrieve MuonContainer with key " << "InDetTrackParticles" << std::endl;
-  }
-
-  for (auto track: *tracks) {
-    if ( !m_muonSelection->passedIDCuts(*track) ) continue;
-    if( track->charge() != metrk->charge()) continue;
-
-    double dr = dR(metrk->eta(), metrk->phi(), track->eta(), track->phi());
-    if(dr<dr_min) dr_min = dr;
-  }
-  
-  return dr_min;
-}
 
 
 double jetMass :: dR(const double eta1,
@@ -737,27 +386,6 @@ StatusCode jetMass :: finalize ()
   return StatusCode::SUCCESS;
 }
 
-
-
-int jetMass :: parent_classify(const xAOD::TruthParticle *theParticle) {
-  const xAOD::TruthParticle *parent = 0; // the parent object
-  Int_t particle_id = 999;
-  Int_t parent_id = 999;
-
-  if (theParticle == NULL) return parent_id;
-
-  particle_id = theParticle->pdgId();
-  parent = theParticle->parent(0);
-  if (parent) parent_id = parent->pdgId();
-  else return parent_id;
-
-  while (fabs(parent_id) == fabs(particle_id) && fabs(parent_id) < 400 && fabs(parent_id) != 0) {
-    parent = parent->parent(0);
-    if (parent) parent_id = parent->pdgId();
-    else break;
-  }
-  return parent_id;
-}
 
 int jetMass::TruthMatching(double jetEta, double jetPhi,std::unique_ptr<xAOD::JetContainer> &truthJets) {
 
